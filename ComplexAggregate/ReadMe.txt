@@ -7,7 +7,7 @@ Script for running through each of the components of this project.
 - Already located in the resource class
 
 2. Define the rest server
-<cxf:rsServer id="restFrontend" address="http://localhost:9090/route" serviceClass="com.mycompany.camel.cxf.GetQuoteResource" />   
+<cxf:rsServer id="restFrontend" address="http://localhost:9090/route" serviceClass="com.mycompany.rest.GetQuoteResource" />   
 
 2 – Add “from” REST endpoint to the route
 <from uri="cxfrs:bean:restFrontend"/>
