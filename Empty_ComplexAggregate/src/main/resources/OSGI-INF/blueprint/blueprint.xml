@@ -14,11 +14,18 @@
              http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
              http://cxf.apache.org/blueprint/jaxrs http://http://cxf.apache.org/schemas/blueprint/jaxrs.xsd">
 
+	<cxf:rsServer id="restFrontend" address="http://localhost:9090/route" serviceClass="com.mycompany.rest.GetQuoteResource" />   
+	<bean id="aggregateOrdersBean" class="com.mycompany.beans.AggregateOrders"/>
 
 	<camelContext xmlns="http://camel.apache.org/schema/blueprint">
-    	<route customId="true" id="Main Route">
-			<from uri="direct:foo"/>
-			<log message="hello"/>
-    	</route>
-	</camelContext>
+    <endpoint uri="http://www.webservicex.net/stockquote.asmx" id="callQuoteWebService"/>
+    <route customId="true" id="Main Route"/>
+    <route customId="true" id="setHeaders"/>
+    <route customId="true" id="Serviceproxy">
+        <from uri="direct:serviceProxy"/>
+        <setBody>
+            <xpath resultType="java.lang.String">/soap:Envelope/soap:Body/ws:GetQuoteResponse/ws:GetQuoteResult</xpath>
+        </setBody>
+    </route>
+</camelContext>
 </blueprint>	
