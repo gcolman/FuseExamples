@@ -1,4 +1,4 @@
-package com.mycompany.camel.cxf;
+package com.mycompany.rest;
 
 import javax.ws.rs.*;
 
