@@ -20,9 +20,20 @@
 	<camelContext xmlns="http://camel.apache.org/schema/blueprint">
     <endpoint uri="http://www.webservicex.net/stockquote.asmx" id="callQuoteWebService"/>
     <route customId="true" id="Main Route"/>
-    <route customId="true" id="setHeaders"/>
+    <route customId="true" id="setHeaders">
+        <from uri="direct:setHeaders"/>
+        <removeHeaders pattern="CamelHttp*"/>
+        <setHeader headerName="numorders">
+            <xpath>/quote/@numorders</xpath>
+        </setHeader>
+        <setHeader headerName="orderid">
+            <xpath>/quote/@orderid</xpath>
+        </setHeader>
+    </route>
     <route customId="true" id="Serviceproxy">
         <from uri="direct:serviceProxy"/>
+        <to uri="xslt:xsl/quote.xsl"/>
+        <to ref="callQuoteWebService"/>
         <setBody>
             <xpath resultType="java.lang.String">/soap:Envelope/soap:Body/ws:GetQuoteResponse/ws:GetQuoteResult</xpath>
         </setBody>

@@ -15,34 +15,40 @@
              http://cxf.apache.org/blueprint/jaxrs http://http://cxf.apache.org/schemas/blueprint/jaxrs.xsd">
 
 
-	<cxf:rsServer id="restFrontend" address="http://localhost:9090/route" serviceClass="com.mycompany.camel.cxf.GetQuoteResource" />   
+	<cxf:rsServer id="restFrontend" address="http://localhost:9090/route" serviceClass="com.mycompany.rest.GetQuoteResource" />   
 	<bean id="aggregateOrdersBean" class="com.mycompany.beans.AggregateOrders"/>
 
 <camelContext xmlns="http://camel.apache.org/schema/blueprint">
     <endpoint uri="http://www.webservicex.net/stockquote.asmx" id="callQuoteWebService"/>
     <route customId="true" id="Main Route">
         <from uri="cxfrs:bean:restFrontend"/>
+        <log message="*** Original Message *** ${body}"/>
         <to uri="direct:setHeaders"/>
         <split parallelProcessing="true" strategyRef="aggregateOrdersBean">
             <xpath>/quote/company</xpath>
+            <log message="*** Split Message *** ${body}"/>
             <to uri="direct:serviceProxy"/>
             <aggregate strategyRef="aggregateOrdersBean">
                 <correlationExpression>
                     <header>orderid</header>
                 </correlationExpression>
+                <completionPredicate>
+                    <simple></simple>
+                </completionPredicate>
+                <completionTimeout>
+                    <simple></simple>
+                </completionTimeout>
                 <completionSize>
                     <header>numorders</header>
                 </completionSize>
-                <log message="${body}"/>
+                <optimisticLockRetryPolicy/>
+                <log message="*** Aggregated Message *** ${body}"/>
             </aggregate>
         </split>
     </route>
     <route customId="true" id="setHeaders">
         <from uri="direct:setHeaders"/>
         <removeHeaders pattern="CamelHttp*"/>
-        <setHeader headerName="Content-Type">
-            <simple>text/xml</simple>
-        </setHeader>
         <setHeader headerName="numorders">
             <xpath>/quote/@numorders</xpath>
         </setHeader>
@@ -57,6 +63,5 @@
         <setBody>
             <xpath resultType="java.lang.String">/soap:Envelope/soap:Body/ws:GetQuoteResponse/ws:GetQuoteResult</xpath>
         </setBody>
-        <log message="${body}"/>
     </route>
 </camelContext></blueprint>	
